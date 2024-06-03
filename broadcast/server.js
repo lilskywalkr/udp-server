@@ -1,28 +1,15 @@
 const dgram = require('dgram');
-const server = dgram.createSocket('udp4');
+const socket = dgram.createSocket('udp4');
 
-server.on('error', (err) => {
-    console.error(`Server error: ${err.message}`);
-    server.close();
+socket.on('listening', function () {
+	const address = socket.address();
+	console.log('UDP socket listening on ' + address.address + ":" + address.port);
 });
 
-server.on('message', (msg, rinfo) => {
-    console.log(`Server got: "${msg}" from ${rinfo.address}:${rinfo.port}`);
-    
-    // Send a response back to the client
-    const response = Buffer.from(String(msg));
-    server.send(response, rinfo.port, rinfo.address, (err) => {
-        if (err) {
-            console.error(`Server error: ${err.message}`);
-            server.close();
-        }
-    });
+socket.on('message', function (message, remote) {
+	console.log('SERVER RECEIVED:', remote.address + ':' + remote.port +' - ' + message);
+	const response = "Hellow there!";
+	socket.send(response, 0, response.length, remote.port, remote.address);
 });
 
-server.on('listening', () => {
-    const address = server.address();
-    console.log(`Server listening on ${address.address}:${address.port}`);
-    server.setBroadcast(true); // Enable broadcasting
-});
-
-server.bind(5000);
+socket.bind('5555');
